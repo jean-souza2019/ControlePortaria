@@ -61,7 +61,9 @@ while True:
                     best_macth_index = np.argmin(face_distances)
                     if matches[best_macth_index]:
                         name = faces_names[best_macth_index]+" mostre seu token!"
+                        # revisar, mas a principio aqui dentro do if que vai os codigos do arquivo DuploFator.py
                     face_names.append(name)
+                    
             process_this_frame = not process_this_frame
 
             for (top, right, bottom, left), name in zip(face_locations, face_names):
@@ -75,7 +77,9 @@ while True:
                             font, 1, (255, 255, 255), 1)
 
             # encerrando a detecção
-            cv2.imshow("Camera", frame)
+            
+            # aprensetar mas um imshow com alguma mascara IGUAL ATIVIDADE11.png
+            cv2.imshow("Camera", frame)         
             k = cv2.waitKey(60)
             if k == 27:
                 cv2.destroyAllWindows()
@@ -100,6 +104,7 @@ while True:
                 print ("\n" * 130) 
                 name = input('Informe seu nome: \n')
                 name.replace(" ", "_")
+                # Aqui fazer um resize da imagem reduzindo ela em algum tamanho bom que mostre somente o rosto. OBS precisa ser quadrado
                 cv2.imwrite('Cadastros/'+str(name)+'.png', image)
                 camera.release()
                 cv2.destroyAllWindows()
