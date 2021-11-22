@@ -3,6 +3,15 @@ import cv2
 import numpy as np
 import os
 import glob
+import time
+from datetime import datetime
+
+
+tokenValido = False
+idPessoal = False
+
+def mudouValor(x):
+    pass
 
 while True:
     print("\n########  Bem-Vindo  ########")
@@ -52,40 +61,99 @@ while True:
                     rgb_small_frame, face_locations)
                 face_names = []
                 for face_encoding in face_encodings:
-                    umdois = 0
                     matches = face_recognition.compare_faces(
                         faces_encodings, face_encoding)
+                    
                     name = "Acesso Negado"
                     face_distances = face_recognition.face_distance(
                         faces_encodings, face_encoding)
-                    best_macth_index = np.argmin(face_distances)
+                    
+                    # if(face_distances != []):
+                    #     best_macth_index = np.argmin(face_distances)
+                    #     print(best_macth_index)
+                    
+                    if(face_distances != []):
+                        best_macth_index = np.argmin(face_distances)
+                        print(best_macth_index)
+                        
                     if matches[best_macth_index]:
-                        name = faces_names[best_macth_index]+" mostre seu token!"
-                        # revisar, mas a principio aqui dentro do if que vai os codigos do arquivo DuploFator.py
+                        idPessoal = True
+                        namePessoa = faces_names[best_macth_index]
+                        name = namePessoa+", mostre seu token!"
+                        
+                        
+                        # Aqui começa tratamento para token
+                        frameHsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+                        upperColor = np.array([179, 255, 255])
+                        lowerColor = np.array([150, 131, 67])
+                        maskToken = cv2.inRange(frameHsv, lowerColor, upperColor)
+                        resultadoToken = cv2.bitwise_and(frame, frame, mask=maskToken)
+    
+                        _, borda = cv2.threshold(cv2.cvtColor(
+                            resultadoToken, cv2.COLOR_BGR2GRAY), 3, 255, cv2.THRESH_BINARY)
+
+                        contornos, _ = cv2.findContours(
+                            borda, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)                        
+                    
+                        
                     face_names.append(name)
                     
             process_this_frame = not process_this_frame
 
+                         
             for (top, right, bottom, left), name in zip(face_locations, face_names):
                 top *= 4
                 right *= 4
                 bottom *= 4
                 left *= 4
-                cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
+                cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 255), 1)
                 font = cv2.FONT_HERSHEY_DUPLEX
                 cv2.putText(frame, name, (left+6, bottom-6),
                             font, 1, (255, 255, 255), 1)
 
-            # encerrando a detecção
+            if matches[best_macth_index]:
+                for contornoToken in contornos:
+                    area = cv2.contourArea(contornoToken)
+                    xToken, yToken, wToken, hToken = cv2.boundingRect(contornoToken)
+                    if area > 500:   
+                        tokenValido = True
+                        cv2.putText(frame, "Token valido.", (xToken, yToken-10),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255))
             
-            # aprensetar mas um imshow com alguma mascara IGUAL ATIVIDADE11.png
-            cv2.imshow("Camera", frame)         
+
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+            lap = cv2.Laplacian(gray, cv2.CV_64F)
+            lap = np.uint8(np.absolute(lap))
+
+            cv2.imshow("Laplaciano Simples", lap)
+            
+            cv2.imshow("Camera", frame)     
+                
             k = cv2.waitKey(60)
-            if k == 27:
+            
+            if (tokenValido == True & idPessoal == True):
+                time.sleep(2)
+                cv2.destroyAllWindows()
+                video_capture.release()
+                print("\n########  Bem-Vindo, "+str(namePessoa)+"  ########")
+                print("###  Você acaba de logar no sistema.  ### \n")
+                time.sleep(15)
+                break
+            
+            
+            elif (k == 27):
                 cv2.destroyAllWindows()
                 video_capture.release()
                 break
         
+        # Gera log caso usuário foi autenticado
+        if(tokenValido == True):
+            with open("log.txt", "a") as arquivo:
+                data_e_hora_atuais = datetime.now()
+                data_e_hora_em_texto = data_e_hora_atuais.strftime('%d/%m/%Y %H:%M')
+                arquivo.write("Usuario "+str(namePessoa)+" realizou login em: "+str(data_e_hora_em_texto)+"\n")
+            
         
 
     elif (entrada == 2):
