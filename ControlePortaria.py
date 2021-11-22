@@ -71,10 +71,10 @@ while True:
                     # if(face_distances != []):
                     #     best_macth_index = np.argmin(face_distances)
                     #     print(best_macth_index)
-                    
-                    if(face_distances != []):
-                        best_macth_index = np.argmin(face_distances)
-                        print(best_macth_index)
+
+                    best_macth_index = np.argmin(face_distances)
+                    # print(face_distances)
+                    # print(best_macth_index)
                         
                     if matches[best_macth_index]:
                         idPessoal = True
@@ -108,6 +108,10 @@ while True:
                 left *= 4
                 cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 255), 1)
                 font = cv2.FONT_HERSHEY_DUPLEX
+                print("top"+str(top))
+                print("left"+str(left))
+                print("right"+str(right))
+                print("bottom"+str(bottom))
                 cv2.putText(frame, name, (left+6, bottom-6),
                             font, 1, (255, 255, 255), 1)
 
@@ -127,7 +131,6 @@ while True:
             lap = np.uint8(np.absolute(lap))
 
             cv2.imshow("Laplaciano Simples", lap)
-            
             cv2.imshow("Camera", frame)     
                 
             k = cv2.waitKey(60)
@@ -163,17 +166,21 @@ while True:
         print("Clique espaço para capturar")
         while True:
             return_value, image = camera.read()
+            imageCrop = image
 
+            #Criação do Crop para imagem 
+            crop = imageCrop[220:500, 300:500]
+            
+            cv2.imshow("Rosto", crop)
             cv2.imshow("Novo Cadastro", image)
 
             k = cv2.waitKey(1)
             if k%256 == 32:
-                # ESPAÇO para tirar foto
+                # Favor centralize o rosto e pressione ESPAÇO para tirar foto
                 print ("\n" * 130) 
                 name = input('Informe seu nome: \n')
                 name.replace(" ", "_")
-                # Aqui fazer um resize da imagem reduzindo ela em algum tamanho bom que mostre somente o rosto. OBS precisa ser quadrado
-                cv2.imwrite('Cadastros/'+str(name)+'.png', image)
+                cv2.imwrite('Cadastros/'+str(name)+'.png', crop)
                 camera.release()
                 cv2.destroyAllWindows()
                 break
