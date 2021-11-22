@@ -29,7 +29,7 @@ while True:
         cur_direc = os.getcwd()
 
         path = os.path.join(cur_direc, 'Cadastros/')
-        list_of_files = [f for f in glob.glob(path+"*.png")]
+        list_of_files = [f for f in glob.glob(path+"*.jpg")]
         number_files = len(list_of_files)
         names = list_of_files.copy()
 
@@ -38,7 +38,7 @@ while True:
             encoding = face_recognition.face_encodings(presets)[0]
             faces_encodings.append(encoding)
             names[i] = names[i].replace(cur_direc+"\\Cadastros\\", "")
-            names[i] = names[i].replace(".png", "")
+            names[i] = names[i].replace(".jpg", "")
             faces_names.append(names[i])
 
 
@@ -67,14 +67,8 @@ while True:
                     name = "Acesso Negado"
                     face_distances = face_recognition.face_distance(
                         faces_encodings, face_encoding)
-                    
-                    # if(face_distances != []):
-                    #     best_macth_index = np.argmin(face_distances)
-                    #     print(best_macth_index)
-
+  
                     best_macth_index = np.argmin(face_distances)
-                    # print(face_distances)
-                    # print(best_macth_index)
                         
                     if matches[best_macth_index]:
                         idPessoal = True
@@ -108,14 +102,10 @@ while True:
                 left *= 4
                 cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 255), 1)
                 font = cv2.FONT_HERSHEY_DUPLEX
-                print("top"+str(top))
-                print("left"+str(left))
-                print("right"+str(right))
-                print("bottom"+str(bottom))
                 cv2.putText(frame, name, (left+6, bottom-6),
                             font, 1, (255, 255, 255), 1)
 
-            if matches[best_macth_index]:
+            if idPessoal == True:
                 for contornoToken in contornos:
                     area = cv2.contourArea(contornoToken)
                     xToken, yToken, wToken, hToken = cv2.boundingRect(contornoToken)
@@ -140,8 +130,9 @@ while True:
                 cv2.destroyAllWindows()
                 video_capture.release()
                 print("\n########  Bem-Vindo, "+str(namePessoa)+"  ########")
-                print("###  Você acaba de logar no sistema.  ### \n")
-                time.sleep(15)
+                print("###  Você acaba de logar no sistema.  ### \n\n\n")
+                print("##  Aguarde 10 segundos  ## \n")
+                time.sleep(10)
                 break
             
             
@@ -180,7 +171,7 @@ while True:
                 print ("\n" * 130) 
                 name = input('Informe seu nome: \n')
                 name.replace(" ", "_")
-                cv2.imwrite('Cadastros/'+str(name)+'.png', crop)
+                cv2.imwrite('Cadastros/'+str(name)+'.jpg', crop)
                 camera.release()
                 cv2.destroyAllWindows()
                 break
@@ -188,3 +179,6 @@ while True:
     elif (entrada == 3):
         cv2.destroyAllWindows()
         break
+    
+    else:
+        continue
